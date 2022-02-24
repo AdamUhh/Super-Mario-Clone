@@ -19,7 +19,7 @@ export function createMario() {
     // ? you can directly use 'this' inside the function, instead of 'mario'
     mario.draw = function drawMario(context) {
       // ? when composite.draw is run, it will run SpriteSheet.draw for mario given tile
-      marioSprite.draw("idle", context, this.pos.x, this.pos.y); // ? draw mario on the screen
+      marioSprite.draw("idle", context, 0, 0); // ? draw mario on the screen
     };
 
     return mario;

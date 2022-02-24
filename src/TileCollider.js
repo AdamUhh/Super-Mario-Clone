@@ -17,6 +17,7 @@ export default class TileCollider {
       return;
     }
 
+    // ? used to check the tiles around mario
     const matches = this.tiles.searchByRange(
       x,
       x,
@@ -25,7 +26,9 @@ export default class TileCollider {
     );
 
     matches.forEach((match) => {
-      if (match.tile.name !== "ground") {
+      // ? if the tile.type (from the /level/*.json file) does not have a type 'ground'
+      // ? essentially, if the tile is not considered to be collidable with mario
+      if (match.tile.type !== "ground") {
         return;
       }
       // ? if mario is touching the 'ground'
@@ -66,7 +69,7 @@ export default class TileCollider {
     );
 
     matches.forEach((match) => {
-      if (match.tile.name !== "ground") {
+      if (match.tile.type !== "ground") {
         return;
       }
 

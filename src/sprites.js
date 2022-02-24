@@ -11,12 +11,13 @@ export function loadMarioSprite() {
   });
 }
 
-export function loadBackgroundSprites() {
-  // ? Load and define the background spritesheet data
-  return loadImage("images/tiles.png").then((image) => {
-    const sprites = new SpriteSheet(image, 16, 16); // ? tile size is 16x16
-    sprites.defineTile("ground", 0, 0); // ? create new tile 'ground' from spritesheet tile image - tile inside the image is at position at (0, 0) * 16
-    sprites.defineTile("sky", 3, 23); // ? create new tile 'sky' from spritesheet tile image - tile inside the image is at position at (3, 23) * 16
-    return sprites;
-  });
-}
+// ? No longer needed due to loadSpriteSheet() inside /loaders/
+// export function loadBackgroundSprites() {
+//   // ? Load and define the background spritesheet data
+//   return loadImage("images/tiles.png").then((image) => {
+//     const sprites = new SpriteSheet(image, 16, 16); // ? tile size is 16x16
+//     sprites.defineTile("ground", 0, 0); // ? create new tile 'ground' from spritesheet tile image - tile inside the image is at position at (0, 0) * 16
+//     sprites.defineTile("sky", 3, 23); // ? create new tile 'sky' from spritesheet tile image - tile inside the image is at position at (3, 23) * 16
+//     return sprites;
+//   });
+// }
