@@ -150,6 +150,7 @@
             "tile": "chance",
             "type": "ground",
             "ranges": [
+                [2,5],
                 [
                     23,
                     9

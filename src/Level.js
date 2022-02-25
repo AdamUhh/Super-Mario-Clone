@@ -7,6 +7,7 @@ export default class Level {
     // ? Used to setup the actual level
     // ? This class will handle level making and tile collision between entities and each tile
     this.gravity = 2000;
+    this.totalTime = 0; // ? will be accumulated. Used for animation as it lets us know how long the level has progressed for
     this.compositor = new Compositor(); // ? Draw layers in order
     this.entities = new Set(); // ? Only allows one instance of every entity in the level
     this.tiles = new Matrix();
@@ -33,5 +34,8 @@ export default class Level {
       // ? Simulate Gravity (constantly give mario gravity, that is reset inside)
       entity.vel.y += this.gravity * deltaTime;
     });
+
+    // ? used inside /layers/ in order to let us know how long the level has progressed for
+    this.totalTime += deltaTime;
   }
 }

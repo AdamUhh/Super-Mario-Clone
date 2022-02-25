@@ -1,15 +1,4 @@
 // function drawBackground(background, context, mappedBackgroundSprites) {
-//   // ? ex: [0,25,0,14] means from (x0 to x25) * 16 = 400px
-//   // ? and (y0 to y14) * 16 = 224px
-//   background.ranges.forEach(([x1, x2, y1, y2]) => {
-//     for (let x = x1; x < x2; ++x) {
-//       for (let y = y1; y < y2; ++y) {
-//         // ? draw the tile onto the screen
-//         mappedBackgroundSprites.drawTile(background.tile, context, x, y);
-//       }
-//     }
-//   });
-// }
 
 export function createBackgroundLayer(level, mappedBackgroundSprites) {
   const tiles = level.tiles; // ? contains all the tiles properties(coords, name, type) that is to be put on the screen
@@ -24,7 +13,7 @@ export function createBackgroundLayer(level, mappedBackgroundSprites) {
   let endIndex;
   function redraw(drawFrom, drawTo) {
     // ? redraw only when needed
-    if (startIndex === drawFrom && endIndex === drawTo) return;
+    // if (startIndex === drawFrom && endIndex === drawTo) return;
     startIndex = drawFrom;
     endIndex = drawTo;
 
@@ -35,14 +24,27 @@ export function createBackgroundLayer(level, mappedBackgroundSprites) {
       if (column) {
         // ? loop through all the tiles (y-axis)
         column.forEach((tile, y) => {
-          // ? draw the background tiles
-          mappedBackgroundSprites.drawTile(
-            tile.name,
-            context,
-            // ? ex: x = 18 and startIndex = 2, this will properly draw the tiles at correct coords (and will also fit 16tiles as 18-2=16)
-            x - startIndex,
-            y
-          );
+          // ? check if 'overworld' has an animation property
+          // ? and check if it contains the provided tile name (ex: chance)
+          if (mappedBackgroundSprites.animations.has(tile.name)) {
+            mappedBackgroundSprites.drawAnim(
+              tile.name,
+              context,
+              x - startIndex,
+              y,
+              // ? essentially, this is the deltaTime, which tells us how long the level has progressed for
+              level.totalTime
+            );
+          } else {
+            // ? draw the background tiles
+            mappedBackgroundSprites.drawTile(
+              tile.name,
+              context,
+              // ? ex: x = 18 and startIndex = 2, this will properly draw the tiles at correct coords (and will also fit 16tiles as 18-2=16)
+              x - startIndex,
+              y
+            );
+          }
         });
       }
     }

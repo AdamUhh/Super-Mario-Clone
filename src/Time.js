@@ -8,6 +8,8 @@ export default class Timer {
     let accumulatedTime = 0;
     let lastTime = 0;
 
+
+
     // ? This is a proxy for the this.update, in order to control when an update will happen
     // ? via the while loop
     this.updateProxy = (time) => {
@@ -18,6 +20,11 @@ export default class Timer {
       // ? Output: accumulatedTime: 0.02296100000000007
       // ? Output: deltaTime: 0.016666666666666666 (1/60)
       accumulatedTime += (time - lastTime) / 1000;
+
+      // ? temporary hack to never go beyond 1. This will fix lag issues
+      if (accumulatedTime > 1) {
+        accumulatedTime = 1
+      }
 
       while (accumulatedTime > deltaTime) {
         // ? If the time that has passed from the last frame is now greater than deltaTime
