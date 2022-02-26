@@ -1,3 +1,4 @@
+import { Sides } from "./Entity";
 import TileResolver from "./TileResolver";
 
 export default class TileCollider {
@@ -31,7 +32,6 @@ export default class TileCollider {
       if (match.tile.type !== "ground") {
         return;
       }
-      // ? if mario is touching the 'ground'
       // ? does mario have velocity
       if (entity.vel.x > 0) {
         // ? is mario's right side greater than the tile's left side
@@ -77,8 +77,14 @@ export default class TileCollider {
       if (entity.vel.y > 0) {
         // ? if mario's bottom is detected on the top of the 'ground'
         if (entity.pos.y + entity.size.y > match.y1) {
+          // ? if we collided with the ground
           entity.pos.y = match.y1 - entity.size.y;
           entity.vel.y = 0;
+
+          // ? if mario is on the ground
+          // ? this is used to allow mario to jump again
+          // ? this will call the obstruct function inside the class Entity()
+          entity.obstruct(Sides.BOTTOM);
         }
       } else if (entity.vel.y < 0) {
         // ? if mario is jumping
@@ -86,6 +92,10 @@ export default class TileCollider {
         if (entity.pos.y < match.y2) {
           entity.pos.y = match.y2;
           entity.vel.y = 0;
+
+          // ? if mario is in the air/has jumped and has hit the bottom of a tile/a ceiling
+          // ? this is used to cancel the jump
+          entity.obstruct(Sides.TOP)
         }
       }
     });

@@ -25,7 +25,6 @@ function createTiles(level, backgrounds) {
 
   // ? with the new JSON level format, we are specifying the length relative to the provided xStart/yStart
   // ? so if xStart=10 and xLen=5, we will later draw from (10,y) to (15,y)
-
   function applyRange(background, xStart, xLen, yStart, yLen) {
     // ? Setting the background data to level.tiles.grid
     const xEnd = xStart + xLen;
@@ -127,11 +126,11 @@ export function loadLevel(name) {
       const level = new Level();
 
       // ? levelSpecification.backgrounds data/syntax can be found in the /levels/*.json file
-      // ? Create
+      // ? setting the tiles to the matrix
       createTiles(level, levelSpecification.backgrounds);
 
       const backgroundLayer = createBackgroundLayer(
-        // ? create the background using the json levels data
+        // ? create/draw the background using the json levels data (only when needed)
         level,
         backgroundSprites // ? Note: This is a Map (with reference to SpriteSheet)
       );

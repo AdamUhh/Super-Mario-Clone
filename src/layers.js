@@ -1,6 +1,7 @@
 // function drawBackground(background, context, mappedBackgroundSprites) {
 
 export function createBackgroundLayer(level, mappedBackgroundSprites) {
+  // ? Note: mappedBackgroundSprites is a Map (with reference to SpriteSheet)
   const tiles = level.tiles; // ? contains all the tiles properties(coords, name, type) that is to be put on the screen
   const resolver = level.tileCollider.tiles; // ? contains all the tiles data (that will be used to check if mario can collidge with)
 
@@ -12,7 +13,7 @@ export function createBackgroundLayer(level, mappedBackgroundSprites) {
   let startIndex;
   let endIndex;
   function redraw(drawFrom, drawTo) {
-    // ? redraw only when needed
+    // ? redraw the background only when needed
     // if (startIndex === drawFrom && endIndex === drawTo) return;
     startIndex = drawFrom;
     endIndex = drawTo;
@@ -65,8 +66,9 @@ export function createBackgroundLayer(level, mappedBackgroundSprites) {
     const drawTo = drawFrom + drawWidth;
     redraw(drawFrom, drawTo);
 
-    // ? Im not sure what this is for/what it draws, but its needed
-    // ? unsure how this works with the above level.tiles.forEach :c
+    // ? redraw and the below drawImage, draws the actual images on the screen
+    // ? it is not related to the actual tiles that are collidable <- these are 'invisible', 
+    // ? and redraw/below drawImage is the actual image, in order to represent these 'invisible' tiles
     // ? % 16 is used to make sure that the pos (or how many tiles the camera will draw) can never go beyond 16 tiles
     context.drawImage(buffer, -camera.pos.x % 16, -camera.pos.y % 16);
   };

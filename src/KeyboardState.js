@@ -35,6 +35,8 @@ export default class KeyboardState {
     // ? If the key state has changed, change keyState
     this.keyStates.set(code, keyState);
 
+    // ? this is related to the callback that is called inside /input.js/
+    // ? ex: input.addMapping(RIGHT, callback)
     this.keyMap.get(code)(keyState);
   }
 

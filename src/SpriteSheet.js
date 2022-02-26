@@ -54,6 +54,7 @@ export default class SpriteSheet {
     // ? draw tile at (x, y)
     context.drawImage(buffer, x, y);
   }
+  
   drawAnim(name, context, x, y, distance) {
     // ? animation would be resolveFrame() inside /anim.js/
     // ? this would draw the tile according to the name

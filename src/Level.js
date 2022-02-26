@@ -6,7 +6,7 @@ export default class Level {
   constructor() {
     // ? Used to setup the actual level
     // ? This class will handle level making and tile collision between entities and each tile
-    this.gravity = 2000;
+    this.gravity = 1500;
     this.totalTime = 0; // ? will be accumulated. Used for animation as it lets us know how long the level has progressed for
     this.compositor = new Compositor(); // ? Draw layers in order
     this.entities = new Set(); // ? Only allows one instance of every entity in the level
