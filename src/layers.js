@@ -1,22 +1,21 @@
 // function drawBackground(background, context, mappedBackgroundSprites) {
 
-export function createBackgroundLayer(level, mappedBackgroundSprites) {
+import TileResolver from "./TileResolver";
+
+export function createBackgroundLayer(level, tiles, mappedBackgroundSprites) {
   // ? Note: mappedBackgroundSprites is a Map (with reference to SpriteSheet)
-  const tiles = level.tiles; // ? contains all the tiles properties(coords, name, type) that is to be put on the screen
-  const resolver = level.tileCollider.tiles; // ? contains all the tiles data (that will be used to check if mario can collidge with)
+  // const tiles = level.tiles; // ? contains all the tiles properties(coords, name, type) that is to be put on the screen
+  // const resolver = level.tileCollider.tiles; // ? contains all the tiles data (that will be used to check if mario can collidge with)
+  const resolver = new TileResolver(tiles);
 
   const buffer = document.createElement("canvas");
   buffer.width = 256 + 16; // ? 16 is just used to showcase how the Camera works
   buffer.height = 240;
   const context = buffer.getContext("2d");
 
-  let startIndex;
-  let endIndex;
-  function redraw(drawFrom, drawTo) {
-    // ? redraw the background only when needed
-    // if (startIndex === drawFrom && endIndex === drawTo) return;
-    startIndex = drawFrom;
-    endIndex = drawTo;
+  function redraw(startIndex, endIndex) {
+    // ? clear the screen before every redraw
+    context.clearRect(0, 0, buffer.width, buffer.height);
 
     // ? loop through all the tiles (x-axis) from the left to right
     for (let x = startIndex; x <= endIndex; ++x) {
@@ -51,11 +50,6 @@ export function createBackgroundLayer(level, mappedBackgroundSprites) {
     }
   }
 
-  // ? Old: loop through all the level data and draw it on the screen
-  // level.tiles.forEach((tile, x, y) => {
-  //   mappedBackgroundSprites.drawTile(tile.name, context, x, y);
-  // });
-
   return function drawBackgroundLayer(context, camera) {
     // ? only draw more of the level as the camera moves left/right
 
@@ -67,7 +61,7 @@ export function createBackgroundLayer(level, mappedBackgroundSprites) {
     redraw(drawFrom, drawTo);
 
     // ? redraw and the below drawImage, draws the actual images on the screen
-    // ? it is not related to the actual tiles that are collidable <- these are 'invisible', 
+    // ? it is not related to the actual tiles that are collidable <- these are 'invisible',
     // ? and redraw/below drawImage is the actual image, in order to represent these 'invisible' tiles
     // ? % 16 is used to make sure that the pos (or how many tiles the camera will draw) can never go beyond 16 tiles
     context.drawImage(buffer, -camera.pos.x % 16, -camera.pos.y % 16);

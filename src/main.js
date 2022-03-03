@@ -1,8 +1,8 @@
 import { createMario } from "./entities.js";
 import { setupKeyboard } from "./input.js";
 import Timer from "./Time.js";
-import { loadLevel } from "./loaders.js";
 import Camera from "./Camera.js";
+import { loadLevel } from "./loaders/level.js";
 // import { createCameraLayer, createCollisionLayer } from "./layers.js";
 // import { setupMouseControl } from "./debug.js";
 

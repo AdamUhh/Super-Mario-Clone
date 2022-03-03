@@ -1,5 +1,4 @@
 import Compositor from "./Compositor";
-import { Matrix } from "./math";
 import TileCollider from "./TileCollider";
 
 export default class Level {
@@ -10,10 +9,13 @@ export default class Level {
     this.totalTime = 0; // ? will be accumulated. Used for animation as it lets us know how long the level has progressed for
     this.compositor = new Compositor(); // ? Draw layers in order
     this.entities = new Set(); // ? Only allows one instance of every entity in the level
-    this.tiles = new Matrix();
+    this.tileCollider = null; // ? set to null until we set the collision grid
+  }
+  
+  setCollisionGrid(matrix) {
     // ? Matrix is used keep data on each background tile that will eventually be drawn
     // ? and is used to help the TileCollider keep track of what can be counted as a collision
-    this.tileCollider = new TileCollider(this.tiles);
+    this.tileCollider = new TileCollider(matrix);
   }
 
   update(deltaTime) {
