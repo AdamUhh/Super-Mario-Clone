@@ -1,3 +1,4 @@
+import BoundingBox from "./BoundingBox.js";
 import { Vec2 } from "./math.js";
 
 export const Sides = {
@@ -8,6 +9,8 @@ export const Sides = {
   // ? 'top'/'bottom' is only the description
   TOP: Symbol("top"),
   BOTTOM: Symbol("bottom"),
+  RIGHT: Symbol("right"),
+  LEFT: Symbol("left"),
 };
 
 export class Trait {
@@ -30,6 +33,9 @@ export default class Entity {
     this.pos = new Vec2(0, 0);
     this.vel = new Vec2(0, 0);
     this.size = new Vec2(0, 0);
+    this.offset = new Vec2(0, 0); // ? a value to offset the tile image of an entity (used for koopa since tile image is too tall, making him clip through the floor)
+    this.bounds = new BoundingBox(this.pos, this.size, this.offset); // ? simplify the entity boundaries (top, bottom, left, right)
+    this.lifetime = 0; 
 
     this.traits = [];
   }
@@ -59,5 +65,7 @@ export default class Entity {
     this.traits.forEach((trait) => {
       trait.update(this, deltaTime);
     });
+
+    this.lifetime += deltaTime;
   }
 }

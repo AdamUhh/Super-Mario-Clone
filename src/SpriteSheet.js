@@ -54,14 +54,14 @@ export default class SpriteSheet {
     // ? draw tile at (x, y)
     context.drawImage(buffer, x, y);
   }
-  
+
   drawAnim(name, context, x, y, distance) {
     // ? animation would be resolveFrame() inside /anim.js/
     // ? this would draw the tile according to the name
     const animation = this.animations.get(name);
     // ? animation(distance) will do a calculation to be between 0...1...2, which in turn
     // ? is the index of the animation that we want, therefore, its constantly changing
-    // ? since delta time is constantly changing - essentially, we have a loop on the animation 
+    // ? since delta time is constantly changing - essentially, we have a loop on the animation
     // ? (ex: for the chance animation)
     this.drawTile(animation(distance), context, x, y);
   }

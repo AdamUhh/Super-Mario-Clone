@@ -11,9 +11,9 @@ export default class TileCollider {
     let x;
     // ? if mario is moving right (due to Go())
     if (entity.vel.x > 0) {
-      x = entity.pos.x + entity.size.x; // ? Use mario's right side as x
+      x = entity.bounds.right; // ? Use mario's right side as x
     } else if (entity.vel.x < 0) {
-      x = entity.pos.x; // ? Use mario's left side as x
+      x = entity.bounds.left; // ? Use mario's left side as x
     } else {
       return;
     }
@@ -22,8 +22,8 @@ export default class TileCollider {
     const matches = this.tiles.searchByRange(
       x,
       x,
-      entity.pos.y,
-      entity.pos.y + entity.size.y
+      entity.bounds.top,
+      entity.bounds.bottom
     );
 
     matches.forEach((match) => {
@@ -36,16 +36,26 @@ export default class TileCollider {
       if (entity.vel.x > 0) {
         // ? is mario's right side greater than the tile's left side
         // ? (basically, is mario detected on the left side of a 'wall' (going right))
-        if (entity.pos.x + entity.size.x > match.x1) {
+        if (entity.bounds.right > match.x1) {
           // ? force mario's to no longer be inside the wall
-          entity.pos.x = match.x1 - entity.size.x;
+          // entity.bounds.left = match.x1 - entity.size.x
+          entity.bounds.right = match.x1;
+
           entity.vel.x = 0;
+
+          // ? this is for goomba
+          // ? if goomba hits the left side of a 'wall' (going right)
+          entity.obstruct(Sides.RIGHT);
         }
       } else if (entity.vel.x < 0) {
         // ? same thing, but for when mario is detected on the right side of a 'wall' (going left)
-        if (entity.pos.x < match.x2) {
-          entity.pos.x = match.x2;
+        if (entity.bounds.left < match.x2) {
+          entity.bounds.left = match.x2;
           entity.vel.x = 0;
+
+          // ? this is for goomba
+          // ? if goomba hits the right side of a 'wall' (going left)
+          entity.obstruct(Sides.LEFT);
         }
       }
     });
@@ -55,15 +65,15 @@ export default class TileCollider {
     let y;
     // ? if mario is falling down
     if (entity.vel.y > 0) {
-      y = entity.pos.y + entity.size.y; // ? Use mario's bottom side as y
+      y = entity.bounds.bottom; // ? Use mario's bottom side as y
     } else if (entity.vel.y < 0) {
-      y = entity.pos.y; // ? Use mario's top side as y
+      y = entity.bounds.top; // ? Use mario's top side as y
     } else {
       return;
     }
     const matches = this.tiles.searchByRange(
-      entity.pos.x,
-      entity.pos.x + entity.size.x,
+      entity.bounds.left,
+      entity.bounds.right,
       y,
       y
     );
@@ -76,9 +86,10 @@ export default class TileCollider {
       // ? if mario is falling
       if (entity.vel.y > 0) {
         // ? if mario's bottom is detected on the top of the 'ground'
-        if (entity.pos.y + entity.size.y > match.y1) {
+        if (entity.bounds.bottom > match.y1) {
           // ? if we collided with the ground
-          entity.pos.y = match.y1 - entity.size.y;
+          // entity.bounds.top = match.y1 - entity.size.y;
+          entity.bounds.bottom = match.y1;
           entity.vel.y = 0;
 
           // ? if mario is on the ground
@@ -89,13 +100,13 @@ export default class TileCollider {
       } else if (entity.vel.y < 0) {
         // ? if mario is jumping
         // ? if mario's top is detected on the bottom of the 'ground'
-        if (entity.pos.y < match.y2) {
-          entity.pos.y = match.y2;
+        if (entity.bounds.top < match.y2) {
+          entity.bounds.top = match.y2;
           entity.vel.y = 0;
 
           // ? if mario is in the air/has jumped and has hit the bottom of a tile/a ceiling
           // ? this is used to cancel the jump
-          entity.obstruct(Sides.TOP)
+          entity.obstruct(Sides.TOP);
         }
       }
     });
