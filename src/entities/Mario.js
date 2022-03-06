@@ -2,6 +2,10 @@ import Entity from "../Entity";
 import { loadSpriteSheet } from "../loaders";
 import Go from "../traits/Go";
 import Jump from "../traits/Jump.js";
+import Killable from "../traits/Killable";
+import Physics from "../traits/Physics";
+import Solid from "../traits/Solid";
+import Stomper from "../traits/Stomper";
 
 const WALKING_DRAG = 1 / 2000;
 const RUNNING_DRAG = 1 / 5000;
@@ -59,9 +63,17 @@ function createMarioFactory(marioSprite) {
     const mario = new Entity();
     mario.size.set(14, 16); // ? testing
 
+    mario.addTrait(new Physics()); // ? Move the entity, add gravity and check if colliding
+    mario.addTrait(new Solid()); // ? If something is colliding, stop the collision
     mario.addTrait(new Go()); // ? Add walking to mario
     mario.addTrait(new Jump()); // ? Add Jump to mario
+    mario.addTrait(new Stomper()); // ? Check if we are stomping on an enemy entity, and  if so, bounce mario
+    mario.addTrait(new Killable()); // ? To kill, or check if dead and revive
 
+    // ? if mario is dead, remove him instantly from the scene (and then revive)
+    mario.killable.removeAfter = 0;
+
+    // ? mario but running mario
     mario.turbo = setTurboState;
 
     // ? When you assign a function to an object,

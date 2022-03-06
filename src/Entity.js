@@ -17,13 +17,25 @@ export class Trait {
   constructor(name) {
     // ? Trait is an instance of a class that can operate on an entity
     this.NAME = name;
+    this.tasks = [];
   }
+
+  queue(task) {
+    // ? task is a callback that is pushed into the tasks array
+    this.tasks.push(task);
+  }
+
+  finalize() {
+    // ? process all the tasks
+    this.tasks.forEach((task) => task());
+    this.tasks.length = 0; // ? this is the equivalent of deleting all the tasks (after running all of them)
+  }
+
+  collides(us, them) {}
 
   obstruct() {}
 
-  update() {
-    console.warn("Unhandled update call in trait");
-  }
+  update() {}
 }
 
 export default class Entity {
@@ -35,8 +47,8 @@ export default class Entity {
     this.size = new Vec2(0, 0);
     this.offset = new Vec2(0, 0); // ? a value to offset the tile image of an entity (used for koopa since tile image is too tall, making him clip through the floor)
     this.bounds = new BoundingBox(this.pos, this.size, this.offset); // ? simplify the entity boundaries (top, bottom, left, right)
-    this.lifetime = 0; 
-
+    this.lifetime = 0;
+    this.canCollide = true;
     this.traits = [];
   }
 
@@ -50,20 +62,34 @@ export default class Entity {
     // ? This technique is called composition and allows us to create objects in smaller fragments
   }
 
-  obstruct(side) {
+  collides(candidate) {
+    this.traits.forEach((trait) => {
+      // ? this is inside /Mario.js/->Stomper() or /Goomba.js/->Behaviour(), etc
+      trait.collides(this, candidate);
+    });
+  }
+  draw() {}
+
+  finalize() {
+    this.traits.forEach((trait) => {
+      trait.finalize();
+    });
+  }
+
+  obstruct(side, match) {
     // ? used to only allow mario to jump if he is touching the side/'bottom'/'ground'
     // ? Will run an obstruct on all the traits Mario has
     // ? in this case, its for calling the obstruct function inside Jump()
     this.traits.forEach((trait) => {
-      trait.obstruct(this, side);
+      trait.obstruct(this, side, match);
     });
   }
 
-  update(deltaTime) {
-    // ? Will run an update on all the traits Mario has
-    // ? ex: Go(), Jump(), etc.
+  update(deltaTime, level) {
+    // ? Will run an update on all the traits mario or goomba,etc. has
+    // ? ex: Go(), Jump(), PendulumMove(), etc.
     this.traits.forEach((trait) => {
-      trait.update(this, deltaTime);
+      trait.update(this, deltaTime, level);
     });
 
     this.lifetime += deltaTime;

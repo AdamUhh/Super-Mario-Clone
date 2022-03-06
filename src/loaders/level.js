@@ -3,69 +3,97 @@ import Level from "../Level";
 import { loadJSON, loadSpriteSheet } from "../loaders";
 import { Matrix } from "../math";
 
-export function loadLevel(name) {
-  // ? This Promise is to ensure that images and the level are loaded in async
-  // ? ex: if image takes 2s and level takes 3s, it wont take 5s for everything to load
-  // ? but will only take 3 seconds, since they are done asynchronously
-  return loadJSON(`levels/${name}.json`)
-    .then((levelSpecification) =>
-      Promise.all([
-        // ? get the level data (of where you want the sprites/tiles to appear in the level)
-        levelSpecification,
-        // ? define the sprites/tiles (their locations inside the spritesheet image are inside ex: 'overworld.json')
-        loadSpriteSheet(levelSpecification.spritesheet),
-      ])
-    )
-    .then(([levelSpecification, backgroundSprites]) => {
-      const level = new Level();
+function setupCollision(levelSpecification, level) {
+  // ? merge all the layers before we make the collision grid
+  // ? remember, layers[0] first contains the background images (sky, ground)
+  // ? and layers[1] contains the bricks, change, chocolate, pipe-patterns, cloud-patterns, etc)
+  // ? etc.
+  const mergedTiles = levelSpecification.layers.reduce(
+    (mergedTiles, layerSpecification) => {
+      // ? mergedTiles is initially []
+      // ? layerSpecification is the elements of the array (levelSpecification.layers[]) that we loop over
+      return mergedTiles.concat(layerSpecification.tiles);
+      // ? combine all tiles and assign it to mergedTiles
+    },
+    []
+  ); // at the end, we will have all the defined tiles data in one array
 
-      // ? merge all the layers before we make the collision grid
-      // ? remember, layers[0] first contains the background images (sky, ground)
-      // ? and layers[1] contains the bricks, change, chocolate, pipe-patterns, cloud-patterns, etc)
-      // ? etc.
-      const mergedTiles = levelSpecification.layers.reduce(
-        (mergedTiles, layerSpecification) => {
-          // ? mergedTiles is initially []
-          // ? layerSpecification is the elements of the array (levelSpecification.layers[]) that we loop over
-          return mergedTiles.concat(layerSpecification.tiles);
-          // ? combine all tiles and assign it to mergedTiles
-        },
-        []
-      ); // at the end, we will have all the required tile 'type' data in one array
+  // ? remember: this is because the collision grid (invisible) and image tile are separate
+  // ? we dont need the image tiles for the collision grid to block mario
+  const collisionGrid = createCollisionGrid(
+    mergedTiles,
+    levelSpecification.patterns
+  );
+  level.setCollisionGrid(collisionGrid);
+}
 
-      // ? remember: this is because the collision grid (invisible) and image tile are separate
-      // ? we dont need the tile images for the collision grid to block mario
-      const collisionGrid = createCollisionGrid(
-        mergedTiles,
-        levelSpecification.patterns
-      );
-      level.setCollisionGrid(collisionGrid);
+function setupBackgrounds(levelSpecification, level, backgroundSprites) {
+  levelSpecification.layers.forEach((layer) => {
+    const backgroundGrid = createBackgroundGrid(
+      layer.tiles,
+      levelSpecification.patterns
+    );
+    const backgroundLayer = createBackgroundLayer(
+      // ? create/draw the background using the json levels data (only when needed)
+      level,
+      backgroundGrid,
+      backgroundSprites // ? Note: This is a Map (with reference to SpriteSheet)
+    );
+    // ? Note: createBackgroundLayer() returns a function called drawBackgroundLayer(context)
+    // ? drawBackgroundLayer will run when composite.draw is called
+    level.compositor.layers.push(backgroundLayer);
+  });
+}
 
-      levelSpecification.layers.forEach((layer) => {
-        const backgroundGrid = createBackgroundGrid(
-          layer.tiles,
-          levelSpecification.patterns
-        );
-        const backgroundLayer = createBackgroundLayer(
-          // ? create/draw the background using the json levels data (only when needed)
-          level,
-          backgroundGrid,
-          backgroundSprites // ? Note: This is a Map (with reference to SpriteSheet)
-        );
-        // ? Note: createBackgroundLayer() returns a function called drawBackgroundLayer(context)
-        // ? drawBackgroundLayer will run when composite.draw is called
-        level.compositor.layers.push(backgroundLayer);
+function setupEntities(levelSpecification, level, entityFactory) {
+  // ? create mario on the screen
+  const spriteLayer = createSpriteLayer(level.entities);
+
+  // ? using data from the level JSON, get the entities for a specific level
+  // ? and add them to the level
+  levelSpecification.entities.forEach(({ name, pos: [x, y] }) => {
+    // ? createEntity returns ex: createGoomba() from /entities.js/ -> ex: loadGoomba() -> class Goomba() -> createGoomba()
+    const createEntity = entityFactory[name];
+
+    const entity = createEntity();
+    entity.pos.set(x, y);
+    level.entities.add(entity);
+    // ? the above is the equivalent of:
+    // const goomba = entityFactory.goomba();
+    // goomba.pos.x = 220;
+    // level.entities.add(goomba);
+  });
+
+  // ? Note: createSpriteLayer() returns a function called drawSpriteLayer(context)
+  // ? drawSpriteLayer will run when composite.draw is called
+  level.compositor.layers.push(spriteLayer);
+}
+export function createLevelLoader(entityFactory) {
+  return function loadLevel(name) {
+    // ? This Promise is to ensure that images and the level are loaded in async
+    // ? ex: if image takes 2s and level takes 3s, it wont take 5s for everything to load
+    // ? but will only take 3 seconds, since they are done asynchronously
+    return loadJSON(`levels/${name}.json`)
+      .then((levelSpecification) =>
+        Promise.all([
+          // ? get the level data (of where you want the sprites/tiles to appear in the level)
+          levelSpecification,
+          // ? define the sprites/tiles (their locations inside the spritesheet image are inside ex: 'overworld.json')
+          loadSpriteSheet(levelSpecification.spritesheet),
+        ])
+      )
+      .then(([levelSpecification, backgroundSprites]) => {
+        const level = new Level();
+
+        setupCollision(levelSpecification, level);
+
+        setupBackgrounds(levelSpecification, level, backgroundSprites);
+
+        setupEntities(levelSpecification, level, entityFactory);
+
+        return level;
       });
-
-      // ? create mario on the screen
-      const spriteLayer = createSpriteLayer(level.entities);
-
-      // ? Note: createSpriteLayer() returns a function called drawSpriteLayer(context)
-      // ? drawSpriteLayer will run when composite.draw is called
-      level.compositor.layers.push(spriteLayer);
-
-      return level;
-    });
+  };
 }
 
 function createCollisionGrid(tiles, patterns) {
@@ -139,21 +167,24 @@ function expandRange(range) {
   }
 }
 
+// function* expandRanges(ranges) {
+//   for (const range of ranges) {
+//     for (const item of expandRange(range)) {
+//       yield item; // ? will be { x: ?, y: ?}, etc.
+//     }
+//   }
+// }
 function* expandRanges(ranges) {
   for (const range of ranges) {
-    for (const item of expandRange(range)) {
-      yield item; // ? will be { x: ?, y: ?}, etc.
-    }
+    yield* expandRange(range); // ? will be { x: ?, y: ?}, etc.
   }
 }
 
-function expandTiles(tiles, patterns) {
+function* expandTiles(tiles, patterns) {
   // ? createTiles() -> walkTiles() is used to loop through the provided level json data
   // ? and properly set the correct data to the level.tiles(.grid[x][y]) object
 
-  const expandedTiles = [];
-
-  function walkTiles(tiles, offsetX, offsetY) {
+  function* walkTiles(tiles, offsetX, offsetY) {
     for (const tile of tiles) {
       for (const { x, y } of expandRanges(tile.ranges)) {
         const derivedX = x + offsetX;
@@ -167,18 +198,17 @@ function expandTiles(tiles, patterns) {
           const tiles = patterns[tile.pattern].tiles;
           // ? then, it will run walkTiles again, but with the name of the tile
           // ? hence, it will not run this block of code (until the next tile.pattern)
-          walkTiles(tiles, derivedX, derivedY);
+          yield* walkTiles(tiles, derivedX, derivedY);
         } else {
-          expandedTiles.push({ tile, x: derivedX, y: derivedY });
+          yield { tile, x: derivedX, y: derivedY };
         }
       }
     }
   }
 
-  walkTiles(tiles, 0, 0);
-
+  // ? Note: yield* 'expression' which returns an iterable object
   // ? returns an array containing { tile.name, tile.type, type.ranges, x, y }
-  return expandedTiles;
+  yield* walkTiles(tiles, 0, 0);
 }
 
 // ? Old method of createTiles()

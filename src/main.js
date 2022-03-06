@@ -1,30 +1,53 @@
 import Camera from "./Camera.js";
 import { loadEntities } from "./entities.js";
+import Entity from "./Entity.js";
 import { setupKeyboard } from "./input.js";
-import { createCollisionLayer } from "./layers.js";
-import { loadLevel } from "./loaders/level.js";
+import { createLevelLoader } from "./loaders/level.js";
 import Timer from "./Time.js";
+import PlayerController from "./traits/PlayerController.js";
 // import { createCameraLayer, createCollisionLayer } from "./layers.js";
 // import { setupMouseControl } from "./debug.js";
 
-const canvas = document.getElementById("screen");
-// ? context which contains the api that we will actually draw with
-const context = canvas.getContext("2d");
+function createPlayerEnvironment(playerEntity) {
+  // ? creating an instance of playerController, and telling it which
+  // ? entity to track as well as the revival coordinates/checkpoint
+  const playerControl = new PlayerController();
+  playerControl.checkpoint.set(64, 64);
+  playerControl.setPlayer(playerEntity);
 
-Promise.all([loadEntities(), loadLevel("1-1")]).then(([entity, level]) => {
+  // ? a (pointless/useless) entity on the level (to keep track of mario and revive/add to level)
+  const playerEnv = new Entity();
+  playerEnv.addTrait(playerControl);
+
+  return playerEnv;
+}
+
+async function main(canvas) {
+  // ? context which contains the api that we will actually draw with
+  const context = canvas.getContext("2d");
+
+  const entityFactory = await loadEntities();
+  const loadLevel = await createLevelLoader(entityFactory);
+
+  const level = await loadLevel("1-1");
 
   const camera = new Camera();
 
-  const mario = entity.mario();
-  mario.pos.set(64, 64); // ? testing
+  const mario = entityFactory.mario();
 
-  const goomba = entity.goomba();
-  goomba.pos.x = 220;
-  level.entities.add(goomba);
+  // ? Used for debugging (shows red/blue collision boxes around mario)
+  // level.compositor.layers.push(
+  // createCollisionLayer(level)
+  // createCameraLayer(camera)
+  // );
+  //? Used for debugging (will spawn entity/mario to wherever the mouse (down) is)
+  // setupMouseControl(canvas, mario, camera);
 
-  const koopa = entity.koopa();
-  koopa.pos.x = 260;
-  level.entities.add(koopa);
+  // ? adding this will also add mario to the level
+  // ? (since it will consider that mario is dead when we first load)
+  // ? this is done inside PlayerLoader().update()
+  const playerEnv = createPlayerEnvironment(mario);
+  level.entities.add(playerEnv);
 
   // ? spawn a lot of mario's whenever you jump - for fun :P
   // ? must be above 'level.entities.add(mario)'
@@ -44,21 +67,11 @@ Promise.all([loadEntities(), loadLevel("1-1")]).then(([entity, level]) => {
   //     this.spawnTimeout += deltaTime;
   //   },
   // });
-  level.entities.add(mario);
-
-
-  // ? Used for debugging (shows red/blue collision boxes around mario)
-  level.compositor.layers.push(
-    createCollisionLayer(level)
-    // createCameraLayer(camera)
-  );
+  // level.entities.add(mario);
 
   const input = setupKeyboard(mario); // ? set up the controls for mario
 
   input.listenTo(window); // ? listen to user inputs which in turn will affect mario
-
-  //? Used for debugging (will spawn entity/mario to wherever the mouse (down) is)
-  // setupMouseControl(canvas, mario, camera);
 
   // ? This part is used to decouple/separate the internal frame rate of the game
   // ? from the rendering frame rate
@@ -70,11 +83,13 @@ Promise.all([loadEntities(), loadLevel("1-1")]).then(([entity, level]) => {
     level.update(deltaTime); // ? call the update func of the level instance (read class Level for more info)
 
     // ? make camera follow mario
-    if (mario.pos.x > 100) {
-      camera.pos.x = mario.pos.x - 100;
-    }
+    camera.pos.x = Math.max(0, mario.pos.x - 100);
 
     level.compositor.draw(context, camera); // ? draw each tile/tile layer on the screen in order
   };
   timer.start(); // ? start everything
-});
+}
+
+const canvas = document.getElementById("screen");
+
+main(canvas);
