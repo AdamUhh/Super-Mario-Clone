@@ -44,7 +44,7 @@ export default class Jump extends Trait {
     }
   }
 
-  update(entity, deltaTime) {
+  update(entity, { deltaTime }) {
     // ? when you press the jump button, we will look for an opportunity to jump again?
     if (this.requestTime > 0) {
       // ? if mario is ready (on the 'bottom'/'ground')
@@ -52,12 +52,16 @@ export default class Jump extends Trait {
       if (this.ready > 0) {
         this.engageTime = this.duration;
         this.requestTime = 0;
+        this.sounds.add("jump");
       }
       this.requestTime -= deltaTime;
     }
     if (this.engageTime > 0) {
       // ? Math.abs(entity.vel.x) * this.speedBoost means that the faster we run, the higher we will jump
-      entity.vel.y = -(this.velocity + Math.abs(entity.vel.x) * this.speedBoost); // ? the velocity will be -200 on y for a maximum of 0.5s
+      entity.vel.y = -(
+        this.velocity +
+        Math.abs(entity.vel.x) * this.speedBoost
+      ); // ? the velocity will be -200 on y for a maximum of 0.5s
       this.engageTime -= deltaTime;
     }
     // ? if we update the Jump trait, ready is decremented
@@ -65,7 +69,7 @@ export default class Jump extends Trait {
     // ? but once we have obstructed/checked bottom collision
     // ? when we call checkY inside /TileCollider.js/
     // ? it will be set to 1 again
-    // ? then, when we decrement it again, it will be set to 0, of which, 
+    // ? then, when we decrement it again, it will be set to 0, of which,
     // ? there are no checks, as we are only checking for < 0
   }
 }

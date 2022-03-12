@@ -1,4 +1,5 @@
-import { createBackgroundLayer, createSpriteLayer } from "../layers";
+import { createBackgroundLayer } from "../layers/background";
+import { createSpriteLayer } from "../layers/sprites";
 import Level from "../Level";
 import { loadJSON, loadSpriteSheet } from "../loaders";
 import { Matrix } from "../math";

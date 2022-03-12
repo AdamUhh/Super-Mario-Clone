@@ -23,6 +23,9 @@ export default class Stomper extends Trait {
     // ? is mario is falling ontop of them
     if (us.vel.y > them.vel.y) {
       this.bounce(us, them);
+      this.sounds.add("stomp");
+      // Note: us, them is not needed. will change later
+      this.events.emit("stomp", us, them); // ? if we stomp on something, call the 'stomp' function
     }
   }
 }

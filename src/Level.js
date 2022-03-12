@@ -20,12 +20,13 @@ export default class Level {
     this.tileCollider = new TileCollider(matrix);
   }
 
-  update(deltaTime) {
+  update(gameContext) {
+
     // ? For each entity (ex: mario)
     this.entities.forEach((entity) => {
       // ? run its update function, which would be mario's Entity().update()
       // ? which in turn, will loop through and call the update() on mario's Traits, ex: Go(), Jump(), etc
-      entity.update(deltaTime, this);
+      entity.update(gameContext, this);
     });
 
     // ? this is to ensure that gravity affects all entities before anything else is run
@@ -41,6 +42,6 @@ export default class Level {
     });
 
     // ? used inside /layers/ in order to let us know how long the level has progressed for
-    this.totalTime += deltaTime;
+    this.totalTime += gameContext.deltaTime;
   }
 }

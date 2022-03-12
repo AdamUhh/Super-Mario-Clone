@@ -6,7 +6,7 @@ export default class Physics extends Trait {
     super("physics");
   }
 
-  update(entity, deltaTime, level) {
+  update(entity, { deltaTime }, level) {
     // ? if ex: mario has any velocity from Go() (or ex: goomba from PendulumMove()), move his position
     // ? then check if mario is colliding with a (collidable) tile
     entity.pos.x += entity.vel.x * deltaTime;

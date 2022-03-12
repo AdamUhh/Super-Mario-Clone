@@ -80,7 +80,7 @@ class Behaviour extends Trait {
       // ? since koopa would no longer be collidable and we set the velocity so he 'bounces'
       // ? koopa will bounce out of the screen, before being removed from the level
     } else if (this.state === STATE_PANIC) {
-      // ? if koopa is stomped while hiding (koopa will stop moving)
+      // ? if koopa is stomped while panicking (koopa will stop moving)
       this.hide(us);
     }
   }
@@ -110,7 +110,7 @@ class Behaviour extends Trait {
     this.state = STATE_WALKING;
   }
 
-  update(us, deltaTime) {
+  update(us, { deltaTime }) {
     // ? if koopa is currently hiding in his shell
     if (this.state === STATE_HIDING) {
       this.hideTime += deltaTime;

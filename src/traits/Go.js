@@ -19,7 +19,7 @@ export default class Go extends Trait {
     this.heading = 1; // ? 1 is right, -1 is left
   }
 
-  update(entity, deltaTime) {
+  update(entity, { deltaTime }) {
     const absX = Math.abs(entity.vel.x);
 
     if (this.direction !== 0) {

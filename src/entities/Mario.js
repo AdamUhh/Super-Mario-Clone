@@ -1,5 +1,6 @@
 import Entity from "../Entity";
 import { loadSpriteSheet } from "../loaders";
+import { loadAudioBoard } from "../loaders/audio";
 import Go from "../traits/Go";
 import Jump from "../traits/Jump.js";
 import Killable from "../traits/Killable";
@@ -10,15 +11,16 @@ import Stomper from "../traits/Stomper";
 const WALKING_DRAG = 1 / 2000;
 const RUNNING_DRAG = 1 / 5000;
 
-export function loadMario() {
-  // ? Load the spritesheet/image of mario
-  //   return loadSpriteSheet("mario").then((marioSprite) => {
-  //     createMarioFactory(marioSprite);
-  //   });
-  return loadSpriteSheet("mario").then(createMarioFactory);
+export function loadMario(audioContext) {
+  return Promise.all([
+    loadSpriteSheet("mario"),
+    loadAudioBoard("mario", audioContext),
+  ]).then(([marioSprite, audio]) => {
+    return createMarioFactory(marioSprite, audio);
+  });
 }
 
-function createMarioFactory(marioSprite) {
+function createMarioFactory(marioSprite, audio) {
   // ? marioSprite.animations is resolveFrame(distance) due to defineAnim in /SpriteSheet.js/
   const runAnim = marioSprite.animations.get("run");
 
@@ -61,6 +63,7 @@ function createMarioFactory(marioSprite) {
     // ? Note: Remember that 'mario' is an Entity,
     // ? and marioSprite is a SpriteSheet
     const mario = new Entity();
+    mario.audio = audio
     mario.size.set(14, 16); // ? testing
 
     mario.addTrait(new Physics()); // ? Move the entity, add gravity and check if colliding

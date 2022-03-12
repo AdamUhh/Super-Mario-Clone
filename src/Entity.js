@@ -1,4 +1,6 @@
+import AudioBoard from "./AudioBoard.js";
 import BoundingBox from "./BoundingBox.js";
+import EventEmitter from "./EventEmitter.js";
 import { Vec2 } from "./math.js";
 
 export const Sides = {
@@ -17,6 +19,8 @@ export class Trait {
   constructor(name) {
     // ? Trait is an instance of a class that can operate on an entity
     this.NAME = name;
+    this.events = new EventEmitter();
+    this.sounds = new Set();
     this.tasks = [];
   }
 
@@ -31,9 +35,17 @@ export class Trait {
     this.tasks.length = 0; // ? this is the equivalent of deleting all the tasks (after running all of them)
   }
 
-  collides(us, them) {}
+  collides() {}
 
   obstruct() {}
+
+  playSounds(audioBoard, audioContext) {
+    // ? remember, sounds can only play if this.sounds has any elements
+    this.sounds.forEach((name) => {
+      audioBoard.playAudio(name, audioContext);
+    });
+    this.sounds.clear();
+  }
 
   update() {}
 }
@@ -50,6 +62,7 @@ export default class Entity {
     this.lifetime = 0;
     this.canCollide = true;
     this.traits = [];
+    this.audio = new AudioBoard();
   }
 
   addTrait(trait) {
@@ -85,13 +98,14 @@ export default class Entity {
     });
   }
 
-  update(deltaTime, level) {
+  update(gameContext, level) {
     // ? Will run an update on all the traits mario or goomba,etc. has
     // ? ex: Go(), Jump(), PendulumMove(), etc.
     this.traits.forEach((trait) => {
-      trait.update(this, deltaTime, level);
+      trait.update(this, gameContext, level);
+      trait.playSounds(this.audio, gameContext.audioContext);
     });
 
-    this.lifetime += deltaTime;
+    this.lifetime += gameContext.deltaTime;
   }
 }

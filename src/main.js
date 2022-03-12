@@ -2,6 +2,9 @@ import Camera from "./Camera.js";
 import { loadEntities } from "./entities.js";
 import Entity from "./Entity.js";
 import { setupKeyboard } from "./input.js";
+import { createCollisionLayer } from "./layers/collision.js";
+import { createDashboardLayer } from "./layers/dashboard.js";
+import { loadFont } from "./loaders/font.js";
 import { createLevelLoader } from "./loaders/level.js";
 import Timer from "./Time.js";
 import PlayerController from "./traits/PlayerController.js";
@@ -26,7 +29,10 @@ async function main(canvas) {
   // ? context which contains the api that we will actually draw with
   const context = canvas.getContext("2d");
 
-  const entityFactory = await loadEntities();
+  const audioContext = new AudioContext();
+
+  const entityFactory = await loadEntities(audioContext);
+  const font = await loadFont();
   const loadLevel = await createLevelLoader(entityFactory);
 
   const level = await loadLevel("1-1");
@@ -36,10 +42,10 @@ async function main(canvas) {
   const mario = entityFactory.mario();
 
   // ? Used for debugging (shows red/blue collision boxes around mario)
-  // level.compositor.layers.push(
-  // createCollisionLayer(level)
-  // createCameraLayer(camera)
-  // );
+  level.compositor.layers.push(
+    createCollisionLayer(level)
+    // createCameraLayer(camera)
+  );
   //? Used for debugging (will spawn entity/mario to wherever the mouse (down) is)
   // setupMouseControl(canvas, mario, camera);
 
@@ -48,6 +54,8 @@ async function main(canvas) {
   // ? this is done inside PlayerLoader().update()
   const playerEnv = createPlayerEnvironment(mario);
   level.entities.add(playerEnv);
+
+  level.compositor.layers.push(createDashboardLayer(font, playerEnv));
 
   // ? spawn a lot of mario's whenever you jump - for fun :P
   // ? must be above 'level.entities.add(mario)'
@@ -73,6 +81,11 @@ async function main(canvas) {
 
   input.listenTo(window); // ? listen to user inputs which in turn will affect mario
 
+  const gameContext = {
+    audioContext,
+    deltaTime: null,
+  };
+
   // ? This part is used to decouple/separate the internal frame rate of the game
   // ? from the rendering frame rate
   // ? This means that if a client has a slower or higher fps,
@@ -80,7 +93,8 @@ async function main(canvas) {
   const timer = new Timer(1 / 60); // ? 1/60 is 1 frame not 1ms
 
   timer.update = function update(deltaTime) {
-    level.update(deltaTime); // ? call the update func of the level instance (read class Level for more info)
+    gameContext.deltaTime = deltaTime;
+    level.update(gameContext); // ? call the update func of the level instance (read class Level for more info)
 
     // ? make camera follow mario
     camera.pos.x = Math.max(0, mario.pos.x - 100);
@@ -89,7 +103,11 @@ async function main(canvas) {
   };
   timer.start(); // ? start everything
 }
-
 const canvas = document.getElementById("screen");
 
-main(canvas);
+const start = () => {
+  window.removeEventListener("click", start);
+  main(canvas);
+};
+
+window.addEventListener("click", start);
