@@ -20,7 +20,7 @@ export class Trait {
     // ? Trait is an instance of a class that can operate on an entity
     this.NAME = name;
     this.events = new EventEmitter();
-    this.sounds = new Set();
+
     this.tasks = [];
   }
 
@@ -39,14 +39,6 @@ export class Trait {
 
   obstruct() {}
 
-  playSounds(audioBoard, audioContext) {
-    // ? remember, sounds can only play if this.sounds has any elements
-    this.sounds.forEach((name) => {
-      audioBoard.playAudio(name, audioContext);
-    });
-    this.sounds.clear();
-  }
-
   update() {}
 }
 
@@ -62,6 +54,7 @@ export default class Entity {
     this.lifetime = 0;
     this.canCollide = true;
     this.traits = [];
+    this.sounds = new Set();
     this.audio = new AudioBoard();
   }
 
@@ -98,13 +91,22 @@ export default class Entity {
     });
   }
 
+  playSounds(audioBoard, audioContext) {
+    // ? remember, sounds can only play if this.sounds has any elements
+    this.sounds.forEach((name) => {
+      audioBoard.playAudio(name, audioContext);
+    });
+    this.sounds.clear();
+  }
+
   update(gameContext, level) {
     // ? Will run an update on all the traits mario or goomba,etc. has
     // ? ex: Go(), Jump(), PendulumMove(), etc.
     this.traits.forEach((trait) => {
       trait.update(this, gameContext, level);
-      trait.playSounds(this.audio, gameContext.audioContext);
     });
+    // ? on every update, check and play any sounds inside this.sounds
+    this.playSounds(this.audio, gameContext.audioContext);
 
     this.lifetime += gameContext.deltaTime;
   }

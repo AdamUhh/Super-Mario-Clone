@@ -1,29 +1,14 @@
 import Camera from "./Camera.js";
 import { loadEntities } from "./entities.js";
-import Entity from "./Entity.js";
 import { setupKeyboard } from "./input.js";
 import { createCollisionLayer } from "./layers/collision.js";
 import { createDashboardLayer } from "./layers/dashboard.js";
 import { loadFont } from "./loaders/font.js";
 import { createLevelLoader } from "./loaders/level.js";
+import { createPlayer, createPlayerEnvironment } from "./player.js";
 import Timer from "./Time.js";
-import PlayerController from "./traits/PlayerController.js";
 // import { createCameraLayer, createCollisionLayer } from "./layers.js";
 // import { setupMouseControl } from "./debug.js";
-
-function createPlayerEnvironment(playerEntity) {
-  // ? creating an instance of playerController, and telling it which
-  // ? entity to track as well as the revival coordinates/checkpoint
-  const playerControl = new PlayerController();
-  playerControl.checkpoint.set(64, 64);
-  playerControl.setPlayer(playerEntity);
-
-  // ? a (pointless/useless) entity on the level (to keep track of mario and revive/add to level)
-  const playerEnv = new Entity();
-  playerEnv.addTrait(playerControl);
-
-  return playerEnv;
-}
 
 async function main(canvas) {
   // ? context which contains the api that we will actually draw with
@@ -39,7 +24,8 @@ async function main(canvas) {
 
   const camera = new Camera();
 
-  const mario = entityFactory.mario();
+  // ? add score and lives to mario/player
+  const mario = createPlayer(entityFactory.mario());
 
   // ? Used for debugging (shows red/blue collision boxes around mario)
   level.compositor.layers.push(
@@ -51,10 +37,11 @@ async function main(canvas) {
 
   // ? adding this will also add mario to the level
   // ? (since it will consider that mario is dead when we first load)
-  // ? this is done inside PlayerLoader().update()
+  // ? this is done inside PlayerController().update()
   const playerEnv = createPlayerEnvironment(mario);
   level.entities.add(playerEnv);
 
+  // ? add scoreboard to screen
   level.compositor.layers.push(createDashboardLayer(font, playerEnv));
 
   // ? spawn a lot of mario's whenever you jump - for fun :P

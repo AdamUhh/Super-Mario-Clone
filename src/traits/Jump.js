@@ -52,7 +52,7 @@ export default class Jump extends Trait {
       if (this.ready > 0) {
         this.engageTime = this.duration;
         this.requestTime = 0;
-        this.sounds.add("jump");
+        entity.sounds.add("jump");
       }
       this.requestTime -= deltaTime;
     }

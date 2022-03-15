@@ -426,6 +426,19 @@
                     ]
                 }
             ]
+        },
+        {
+            "tiles": [
+                {
+                    "pattern": "cannon-2h",
+                    "ranges": [
+                        [
+                            6,
+                            7
+                        ]
+                    ]
+                }
+            ]
         }
     ],
     "patterns": {
@@ -606,6 +619,30 @@
                     "type": "ground"
                 }
             ]
+        },
+        "cannon-2h": {
+            "tiles": [
+                {
+                    "name": "cannon-1",
+                    "ranges": [
+                        [
+                            0,
+                            0
+                        ]
+                    ],
+                    "type": "ground"
+                },
+                {
+                    "name": "cannon-3",
+                    "ranges": [
+                        [
+                            0,
+                            1
+                        ]
+                    ],
+                    "type": "ground"
+                }
+            ]
         }
     },
     "entities": [
@@ -621,6 +658,12 @@
             "pos": [
                 220,
                 0
+            ]
+        },{
+            "name": "cannon",
+            "pos": [
+                96,
+                112
             ]
         }
     ]
