@@ -7,15 +7,13 @@ import { loadFont } from "./loaders/font.js";
 import { createLevelLoader } from "./loaders/level.js";
 import { createPlayer, createPlayerEnvironment } from "./player.js";
 import Timer from "./Time.js";
-// import { createCameraLayer, createCollisionLayer } from "./layers.js";
-// import { setupMouseControl } from "./debug.js";
 
 async function main(canvas) {
   // ? context which contains the api that we will actually draw with
   const context = canvas.getContext("2d");
 
   const audioContext = new AudioContext();
-
+  
   const entityFactory = await loadEntities(audioContext);
   const font = await loadFont();
   const loadLevel = await createLevelLoader(entityFactory);
@@ -32,8 +30,6 @@ async function main(canvas) {
     createCollisionLayer(level)
     // createCameraLayer(camera)
   );
-  //? Used for debugging (will spawn entity/mario to wherever the mouse (down) is)
-  // setupMouseControl(canvas, mario, camera);
 
   // ? adding this will also add mario to the level
   // ? (since it will consider that mario is dead when we first load)
@@ -72,6 +68,7 @@ async function main(canvas) {
   };
 
   timer.start(); // ? start everything
+  level.music.player.playTrack('main')
 }
 const canvas = document.getElementById("screen");
 

@@ -1,5 +1,6 @@
 {
     "spritesheet": "overworld",
+    "musicsheet": "overworld",
     "layers": [
         {
             "tiles": [

@@ -16,12 +16,11 @@ export function createAudioLoader(audioContext) {
 
 export function loadAudioBoard(name, audioContext) {
   // ? name would be ex: 'mario' for mario.json inside /public/sounds/
-
+  
   const loadAudio = createAudioLoader(audioContext);
   return loadJSON(`sounds/${name}.json`).then((audioSheet) => {
     // ? returns an audioBoard where all the audio is ready to play
-
-    const audioBoard = new AudioBoard(audioContext);
+    const audioBoard = new AudioBoard();
     // ? fx output, ex: jump: {url: '/audio/fx/jump.ogg'}, stomp: {url: '/audio/fx/stomp.ogg'}
     const fx = audioSheet.fx;
     const jobs = [];

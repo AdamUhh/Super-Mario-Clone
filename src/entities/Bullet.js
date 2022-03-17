@@ -1,5 +1,5 @@
 import Entity, { Trait } from "../Entity";
-import { loadSpriteSheet } from "../loaders";
+import { loadSpriteSheet } from "../loaders/sprite";
 import Gravity from "../traits/Gravity";
 import Killable from "../traits/Killable";
 import Velocity from "../traits/Velocity";

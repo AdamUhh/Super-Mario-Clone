@@ -1,5 +1,6 @@
 import Compositor from "./Compositor";
 import EntityCollider from "./EntityCollider";
+import MusicController from "./MusicController";
 import TileCollider from "./TileCollider";
 
 export default class Level {
@@ -8,6 +9,7 @@ export default class Level {
     // ? This class will handle level making and tile collision between entities and each tile
     this.gravity = 1500;
     this.totalTime = 0; // ? will be accumulated. Used for animation as it lets us know how long the level has progressed for
+    this.music = new MusicController();
     this.compositor = new Compositor(); // ? Draw layers in order
     this.entities = new Set(); // ? Only allows one instance of every entity in the level
     this.entityCollider = new EntityCollider(this.entities);

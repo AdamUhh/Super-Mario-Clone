@@ -1,30 +1,10 @@
 import { createBackgroundLayer } from "../layers/background";
 import { createSpriteLayer } from "../layers/sprites";
 import Level from "../Level";
-import { loadJSON, loadSpriteSheet } from "../loaders";
+import { loadJSON } from "../loaders";
 import { Matrix } from "../math";
-
-// // ? refactored to select many collision layers
-// function setupCollision(levelSpecification, level) {
-//   // ? merge all the layers before we make the collision grid
-//   // ? remember, layers[0] first contains the background images (sky, ground)
-//   // ? and layers[1] contains the bricks, change, chocolate, pipe-patterns, cloud-patterns, etc)
-//   // ? etc.
-//   const mergedTiles = levelSpecification.layers.forEach(
-//     (mergedTiles, layerSpecification) => {
-//       // ? mergedTiles is initially []
-//       // ? layerSpecification is the elements of the array (levelSpecification.layers[]) that we loop over
-//       return mergedTiles.concat(layerSpecification.tiles);
-//       // ? combine all tiles and assign it to mergedTiles
-//     },
-//     []
-//   ); // at the end, we will have all the defined tiles data in one array
-
-//   // ? remember: this is because the collision grid (invisible) and image tile are separate
-//   // ? we dont need the image tiles for the collision grid to block mario
-//   const collisionGrid = createGrid(mergedTiles, levelSpecification.patterns);
-//   level.tileCollider.addGrid(collisionGrid);
-// }
+import { loadMusicSheet } from "./music";
+import { loadSpriteSheet } from "./sprite";
 
 function setupBackgrounds(levelSpecification, level, backgroundSprites) {
   levelSpecification.layers.forEach((layer) => {
@@ -78,12 +58,13 @@ export function createLevelLoader(entityFactory) {
           levelSpecification,
           // ? define the sprites/tiles (their locations inside the spritesheet image are inside ex: 'overworld.json')
           loadSpriteSheet(levelSpecification.spritesheet),
+          loadMusicSheet(levelSpecification.musicsheet),
         ])
       )
-      .then(([levelSpecification, backgroundSprites]) => {
+      .then(([levelSpecification, backgroundSprites, musicPlayer]) => {
         const level = new Level();
-
-        // setupCollision(levelSpecification, level);
+        
+        level.music.setPlayer(musicPlayer);
 
         setupBackgrounds(levelSpecification, level, backgroundSprites);
 
