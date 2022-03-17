@@ -11,6 +11,13 @@ export class Matrix {
     });
   }
 
+  delete(x, y) {
+    const column = this.grid[x];
+    if (column) {
+      delete column[y];
+    }
+  }
+
   get(x, y) {
     const column = this.grid[x];
     if (column) {

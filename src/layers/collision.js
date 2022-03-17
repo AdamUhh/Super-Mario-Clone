@@ -18,20 +18,22 @@ function createEntityCollisionLayer(entities) {
   };
 }
 
-function createTileCandidateCollisionLayer(tileCollider) {
+function createTileCandidateCollisionLayer(tileResolver) {
+  // ? set up the coordinates of where to draw the blue squares
   const resolvedTiles = [];
 
-  const tileResolver = tileCollider.tiles;
   const tileSize = tileResolver.tileSize;
 
   // ? reference to TileResolver getByIndex()
   const getByIndexOriginal = tileResolver.getByIndex;
 
   // ? override the original function
+  // ? to be honest, I dont get this part
   tileResolver.getByIndex = function getByIndexFake(x, y) {
     resolvedTiles.push({ x, y });
 
     // ? call(tileResolver) will bind the 'this' keyword to tileResolver
+    // ? with getByIndex overrided with getByIndexFake
     return getByIndexOriginal.call(tileResolver, x, y);
   };
 
@@ -58,11 +60,16 @@ function createTileCandidateCollisionLayer(tileCollider) {
 }
 
 export function createCollisionLayer(level) {
+  // ? essentially, map through the grid, which is resolvers(TileResolver(tileMatrix))
+  // ? remember, the grid contains the data of all layers in an array
+  const drawTileCandidates = level.tileCollider.resolvers.map(
+    createTileCandidateCollisionLayer
+  );
+
   const drawBoundingBoxes = createEntityCollisionLayer(level.entities);
-  const drawTileCandidates = createTileCandidateCollisionLayer(level.tileCollider);
 
   return function drawCollision(context, camera) {
+    drawTileCandidates.forEach((draw) => draw(context, camera));
     drawBoundingBoxes(context, camera);
-    drawTileCandidates(context, camera);
   };
 }

@@ -100,7 +100,7 @@ export default class Entity {
   }
 
   update(gameContext, level) {
-    // ? Will run an update on all the traits mario or goomba,etc. has
+    // ? Will run an update on all the traits that mario, goomba,etc. has
     // ? ex: Go(), Jump(), PendulumMove(), etc.
     this.traits.forEach((trait) => {
       trait.update(this, gameContext, level);

@@ -11,17 +11,12 @@ export default class Level {
     this.compositor = new Compositor(); // ? Draw layers in order
     this.entities = new Set(); // ? Only allows one instance of every entity in the level
     this.entityCollider = new EntityCollider(this.entities);
-    this.tileCollider = null; // ? set to null until we set the collision grid
-  }
-
-  setCollisionGrid(matrix) {
     // ? Matrix is used keep data on each background tile that will eventually be drawn
     // ? and is used to help the TileCollider keep track of what can be counted as a collision
-    this.tileCollider = new TileCollider(matrix);
+    this.tileCollider = new TileCollider();
   }
 
   update(gameContext) {
-
     // ? For each entity (ex: mario)
     this.entities.forEach((entity) => {
       // ? run its update function, which would be mario's Entity().update()

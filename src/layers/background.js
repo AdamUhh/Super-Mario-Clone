@@ -2,12 +2,11 @@ import TileResolver from "../TileResolver";
 
 export function createBackgroundLayer(level, tiles, mappedBackgroundSprites) {
     // ? Note: mappedBackgroundSprites is a Map (with reference to SpriteSheet)
-    // const tiles = level.tiles; // ? contains all the tiles properties(coords, name, type) that is to be put on the screen
-    // const resolver = level.tileCollider.tiles; // ? contains all the tiles data (that will be used to check if mario can collidge with)
-    const resolver = new TileResolver(tiles);
+    const resolver = new TileResolver(tiles); // ? contains all the tiles data (that will be used to check if mario can collidge with)
   
     const buffer = document.createElement("canvas");
-    buffer.width = 256 + 16; // ? 16 is just used to showcase how the Camera works
+    // ? essentially, it is preemtively loading an extra column of tiles (16px)
+    buffer.width = 256 + 16; // ? this helps hide the tiles that are still 'loading' (due to when we move the camera)
     buffer.height = 240;
     const context = buffer.getContext("2d");
   
@@ -52,7 +51,7 @@ export function createBackgroundLayer(level, tiles, mappedBackgroundSprites) {
       // ? only draw more of the level as the camera moves left/right
   
       // ? remember, toIndex will take a position and return the index of that position
-      // ? ex: So a pos of 35.5 to 2 due to the tileSize being 16 (so 35.5/16=2 (rounded))
+      // ? ex: So a pos of 35.5 means 2 due to the tileSize being 16 (so 35.5/16=2 (rounded))
       const drawWidth = resolver.toIndex(camera.size.x); // ? width of the camera (16 tiles)
       const drawFrom = resolver.toIndex(camera.pos.x); // ? pos of the left side of the camera
       const drawTo = drawFrom + drawWidth;

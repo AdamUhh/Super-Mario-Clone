@@ -1,8 +1,9 @@
 export default class TileResolver {
   constructor(matrix, tileSize = 16) {
     this.matrix = matrix;
-    this.tileSize = tileSize; // ? default is 16px
+    this.tileSize = tileSize;
   }
+  
   toIndex(pos) {
     // ? Take a position and return the index of that position
     // ? ex: This will convert a pos of 35.5 to 2 due to the tileSize being 16 (so 35.5/16=2 (rounded))
@@ -42,6 +43,8 @@ export default class TileResolver {
       const y2 = y1 + this.tileSize;
       return {
         tile,
+        indexX,
+        indexY,
         x1,
         x2,
         y1,

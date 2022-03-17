@@ -4,50 +4,47 @@ import Level from "../Level";
 import { loadJSON, loadSpriteSheet } from "../loaders";
 import { Matrix } from "../math";
 
-function setupCollision(levelSpecification, level) {
-  // ? merge all the layers before we make the collision grid
-  // ? remember, layers[0] first contains the background images (sky, ground)
-  // ? and layers[1] contains the bricks, change, chocolate, pipe-patterns, cloud-patterns, etc)
-  // ? etc.
-  const mergedTiles = levelSpecification.layers.reduce(
-    (mergedTiles, layerSpecification) => {
-      // ? mergedTiles is initially []
-      // ? layerSpecification is the elements of the array (levelSpecification.layers[]) that we loop over
-      return mergedTiles.concat(layerSpecification.tiles);
-      // ? combine all tiles and assign it to mergedTiles
-    },
-    []
-  ); // at the end, we will have all the defined tiles data in one array
+// // ? refactored to select many collision layers
+// function setupCollision(levelSpecification, level) {
+//   // ? merge all the layers before we make the collision grid
+//   // ? remember, layers[0] first contains the background images (sky, ground)
+//   // ? and layers[1] contains the bricks, change, chocolate, pipe-patterns, cloud-patterns, etc)
+//   // ? etc.
+//   const mergedTiles = levelSpecification.layers.forEach(
+//     (mergedTiles, layerSpecification) => {
+//       // ? mergedTiles is initially []
+//       // ? layerSpecification is the elements of the array (levelSpecification.layers[]) that we loop over
+//       return mergedTiles.concat(layerSpecification.tiles);
+//       // ? combine all tiles and assign it to mergedTiles
+//     },
+//     []
+//   ); // at the end, we will have all the defined tiles data in one array
 
-  // ? remember: this is because the collision grid (invisible) and image tile are separate
-  // ? we dont need the image tiles for the collision grid to block mario
-  const collisionGrid = createCollisionGrid(
-    mergedTiles,
-    levelSpecification.patterns
-  );
-  level.setCollisionGrid(collisionGrid);
-}
+//   // ? remember: this is because the collision grid (invisible) and image tile are separate
+//   // ? we dont need the image tiles for the collision grid to block mario
+//   const collisionGrid = createGrid(mergedTiles, levelSpecification.patterns);
+//   level.tileCollider.addGrid(collisionGrid);
+// }
 
 function setupBackgrounds(levelSpecification, level, backgroundSprites) {
   levelSpecification.layers.forEach((layer) => {
-    const backgroundGrid = createBackgroundGrid(
-      layer.tiles,
-      levelSpecification.patterns
-    );
+    const grid = createGrid(layer.tiles, levelSpecification.patterns);
     const backgroundLayer = createBackgroundLayer(
       // ? create/draw the background using the json levels data (only when needed)
       level,
-      backgroundGrid,
+      grid,
       backgroundSprites // ? Note: This is a Map (with reference to SpriteSheet)
     );
     // ? Note: createBackgroundLayer() returns a function called drawBackgroundLayer(context)
     // ? drawBackgroundLayer will run when composite.draw is called
     level.compositor.layers.push(backgroundLayer);
+
+    level.tileCollider.addGrid(grid);
   });
 }
 
 function setupEntities(levelSpecification, level, entityFactory) {
-  // ? create mario on the screen
+  // ? create ex: mario on the screen
   const spriteLayer = createSpriteLayer(level.entities);
 
   // ? using data from the level JSON, get the entities for a specific level
@@ -86,7 +83,7 @@ export function createLevelLoader(entityFactory) {
       .then(([levelSpecification, backgroundSprites]) => {
         const level = new Level();
 
-        setupCollision(levelSpecification, level);
+        // setupCollision(levelSpecification, level);
 
         setupBackgrounds(levelSpecification, level, backgroundSprites);
 
@@ -97,28 +94,15 @@ export function createLevelLoader(entityFactory) {
   };
 }
 
-function createCollisionGrid(tiles, patterns) {
-  // ? get the data of tiles that have types (ex: 'ground'),
+function createGrid(tiles, patterns) {
+  // ? get the data of tiles that have types (ex: 'ground', 'bricks', etc.),
   // ? to be used to identify as as collision tile
   const grid = new Matrix();
   for (const { tile, x, y } of expandTiles(tiles, patterns)) {
-    grid.set(x, y, {
-      type: tile.type,
-    });
+    grid.set(x, y, tile);
   }
   // ? ex: grid will be something like [x][y] -> output: {type: 'ground' / undefined}
   // ? so [199][0] -> {type: undefined}, but [199][14] -> {type: 'ground'}
-  return grid;
-}
-
-function createBackgroundGrid(tiles, patterns) {
-  // ? get the tile name
-  const grid = new Matrix();
-  for (const { tile, x, y } of expandTiles(tiles, patterns)) {
-    grid.set(x, y, {
-      name: tile.name,
-    });
-  }
   return grid;
 }
 

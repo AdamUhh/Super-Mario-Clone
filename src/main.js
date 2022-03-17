@@ -44,32 +44,13 @@ async function main(canvas) {
   // ? add scoreboard to screen
   level.compositor.layers.push(createDashboardLayer(font, playerEnv));
 
-  // ? spawn a lot of mario's whenever you jump - for fun :P
-  // ? must be above 'level.entities.add(mario)'
-  // mario.addTrait({
-  //   NAME: "spawnAlotOfMarios",
-  //   spawnTimeout: 0,
-  //   obstruct() {},
-  //   update(mario, deltaTime) {
-  //     if (this.spawnTimeout > 0.1 && mario.vel.y < 0) {
-  //       const spawn = entity.mario();
-  //       spawn.pos.x = mario.pos.x;
-  //       spawn.pos.y = mario.pos.y;
-  //       spawn.vel.y = mario.vel.y - 200;
-  //       level.entities.add(spawn);
-  //       this.spawnTimeout = 0;
-  //     }
-  //     this.spawnTimeout += deltaTime;
-  //   },
-  // });
-  // level.entities.add(mario);
-
   const input = setupKeyboard(mario); // ? set up the controls for mario
 
   input.listenTo(window); // ? listen to user inputs which in turn will affect mario
 
   const gameContext = {
     audioContext,
+    entityFactory,
     deltaTime: null,
   };
 
@@ -81,6 +62,7 @@ async function main(canvas) {
 
   timer.update = function update(deltaTime) {
     gameContext.deltaTime = deltaTime;
+    
     level.update(gameContext); // ? call the update func of the level instance (read class Level for more info)
 
     // ? make camera follow mario
@@ -88,6 +70,7 @@ async function main(canvas) {
 
     level.compositor.draw(context, camera); // ? draw each tile/tile layer on the screen in order
   };
+
   timer.start(); // ? start everything
 }
 const canvas = document.getElementById("screen");
